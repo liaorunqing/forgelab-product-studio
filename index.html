@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>玩具改款生成器</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css?v=3">
+  <link rel="stylesheet" href="/assets/extras.css?v=3">
+</head>
+<body>
+  <header class="masthead">
+    <div class="logo"><i>F</i><span>玩具改款生成器<small>FORGELAB · AI PRODUCT STUDIO</small></span></div>
+    <div id="apiStatus" class="api-status"><b></b> 正在检查 AI 服务…</div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <span class="serial">PRODUCT / 001</span>
+      <h1>上传一个玩具，<br><em>直接拿到新产品。</em></h1>
+      <p>输入灵感视频、图片或功能描述。AI 先把产品定义整理清楚，再分别生成“同结构升级”和“特性迁移新品”。</p>
+    </section>
+
+    <section class="workbench">
+      <div class="step-label"><b>01</b><span>提供灵感</span></div>
+      <div class="input-tabs"><button class="input-tab active" data-input="media">视频 / 图片</button><button class="input-tab" data-input="text">功能描述</button></div>
+      <div id="mediaInputPanel">
+      <label class="dropzone" id="dropzone">
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/quicktime">
+        <img id="preview" alt="原型预览">
+        <video id="videoPreview" controls></video>
+        <div id="dropHint" class="drop-hint"><strong>把灵感视频或图片拖到这里</strong><span>支持 MP4 / MOV / PNG / JPG / WEBP</span><button type="button" id="chooseFileBtn">选择文件</button></div>
+        <button type="button" id="removeFile" class="remove-file" aria-label="移除图片">×</button>
+      </label>
+      </div>
+      <div id="textInputPanel" class="hidden"><textarea id="productDescription" class="description-input" rows="10" placeholder="尽量描述：&#10;1. 外观：产品长什么样、有哪些部件&#10;2. 功能：它能做什么&#10;3. 玩法：用户怎么操作、产品如何反馈&#10;4. 原理：大概通过什么机械或电子方式实现&#10;5. 用户与场景：给谁用、在哪里用&#10;&#10;不完整也没关系，AI 会整理并标出缺失信息。"></textarea></div>
+
+      <div id="analysisBox" class="analysis-box hidden">
+        <div class="step-label"><b>02</b><span>AI 原型分析</span></div>
+        <div id="analysisContent" class="analysis-content"></div>
+      </div>
+
+      <div class="brief">
+        <div class="step-label"><b>03</b><span>告诉 AI 想做什么</span></div>
+        <label>想象中的产品方向<input id="direction" value="面向儿童的陪伴机器人" placeholder="例如：海洋探险、未来城市、萌宠陪伴"></label>
+        <label>补充要求<textarea id="instruction" rows="3">保留原型硬件和内部结构，只调整外壳造型与配色；方案必须适合量产，并说明装配风险。</textarea></label>
+        <div class="route-picker"><label><input type="radio" name="mode" value="structure"><span><b>A · 同结构升级</b><small>机构原理和布局不变，换外壳、升级玩法</small></span></label><label><input type="radio" name="mode" value="feature"><span><b>B · 特性迁移</b><small>提取核心特性，生成不同形态的新产品</small></span></label><label><input type="radio" name="mode" value="both" checked><span><b>A + B · 两条路线</b><small>同时获得保守改款和发散创意</small></span></label></div>
+        <div class="action-row"><label class="count-field">方案数量<select id="count"><option value="1">1 套（快速测试）</option><option value="3">3 套</option><option value="6" selected>6 套（完整）</option></select></label><button id="generateBtn" class="primary" disabled><span>分析并生成产品</span><small>产品定义 + 两条创意路线 + 效果图</small></button></div>
+      </div>
+    </section>
+
+    <section id="progressBox" class="progress-box hidden">
+      <div class="spinner"></div><div><strong id="progressTitle">正在生产您的方案</strong><p id="progressText">正在分析原型结构…</p></div><b id="progressValue">0%</b>
+      <div class="progress-track"><i id="progressBar"></i></div>
+    </section>
+
+    <section id="resultSection" class="results hidden">
+      <div class="results-head"><div><span class="serial">DELIVERABLES</span><h2>您的产品方案</h2><p id="resultSummary"></p></div><button id="downloadAll" class="download">下载全部产物 ↓</button></div>
+      <div id="resultGrid" class="result-grid"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <script src="/app.js?v=6"></script>
+</body>
+</html>
