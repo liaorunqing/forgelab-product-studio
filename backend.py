@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
-import asyncio, base64, json, os, threading, webbrowser
+import asyncio, base64, json, os, socket, threading, webbrowser
 
 import httpx
 from dotenv import load_dotenv
@@ -59,6 +59,14 @@ def save_env_config(data: ApiConfigInput):
     USER_CONFIG.parent.mkdir(parents=True, exist_ok=True)
     USER_CONFIG.write_text("\n".join(f"{k}={v}" for k, v in values.items()) + "\n", encoding="utf-8")
     os.environ.update(values)
+
+def available_port(preferred: int) -> int:
+    for port in range(preferred, preferred + 20):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+            probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            if probe.connect_ex(("127.0.0.1", port)) != 0:
+                return port
+    raise RuntimeError("未找到可用的本地端口，请关闭其他 ForgeLab 窗口后重试")
 
 def fallback_concepts():
     rows = [("月面信使 · Lunar Courier","同源改款","白色外壳升级为月尘银，加入橙色信号灯与夜间救援识别条。",96,3,"orange"),("深海探针 · Abyss Scout","衍生方案","深海蓝防水外壳与荧光黄色标记，探索未知海域的微型伙伴。",91,4,"blue"),("花园精灵 · Garden Bot","衍生方案","柔和薄荷绿与种子舱设计，让每一次探索都带回新的生命。",89,5,"pink"),("火星邮差 · Mars Relay","衍生方案","赤红隔热外壳与可见式天线，适合远距离自动投递任务。",88,4,"orange"),("极地守望 · Polar Scout","衍生方案","冰川白与电光蓝组合，强调低温环境中的安全陪伴。",87,3,"blue"),("森林采样员 · Grove Bot","衍生方案","苔藓绿软质包覆，加入可拆卸样本盒与环境提示灯。",85,5,"pink")]
@@ -224,5 +232,6 @@ async def export_markdown(project_id:str):
 
 if __name__ == "__main__":
     import uvicorn
-    threading.Timer(1.2, lambda: webbrowser.open("http://127.0.0.1:8000/")).start()
-    uvicorn.run(app, host="127.0.0.1", port=int(os.getenv("PORT", "8000")))
+    port = available_port(int(os.getenv("PORT", "8000")))
+    threading.Timer(1.2, lambda: webbrowser.open(f"http://127.0.0.1:{port}/")).start()
+    uvicorn.run(app, host="127.0.0.1", port=port)
