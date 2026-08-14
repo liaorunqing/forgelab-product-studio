@@ -13,3 +13,5 @@ test-*.png
 *.job.json
 *.json
 reference-restyle-test.jpeg
+dist/
+*.spec
