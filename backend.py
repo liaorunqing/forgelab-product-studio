@@ -35,9 +35,27 @@ class Brief(BaseModel):
 class DescriptionInput(BaseModel):
     description: str = Field(min_length=10)
 
+class ApiConfigInput(BaseModel):
+    api_key: str = Field(min_length=10, max_length=500)
+    vision_model: str = Field(default="doubao-seed-1-6-vision", max_length=200)
+    llm_model: str = Field(default="doubao-seed-2-0-lite-260215", max_length=200)
+    image_model: str = Field(default="doubao-seedream-4-0-250828", max_length=200)
+    image_size: str = Field(default="2K", max_length=20)
+
 def api_key(): return os.getenv("ARK_API_KEY", "").strip()
 def configured(): return bool(api_key())
 def headers(): return {"Authorization": f"Bearer {api_key()}", "Content-Type": "application/json"}
+
+def save_env_config(data: ApiConfigInput):
+    values = {
+        "ARK_API_KEY": data.api_key.strip(),
+        "ARK_VISION_MODEL": data.vision_model.strip(),
+        "ARK_LLM_MODEL": data.llm_model.strip(),
+        "ARK_IMAGE_MODEL": data.image_model.strip(),
+        "ARK_IMAGE_SIZE": data.image_size.strip() or "2K",
+    }
+    ROOT.joinpath(".env").write_text("\n".join(f"{k}={v}" for k, v in values.items()) + "\n", encoding="utf-8")
+    os.environ.update(values)
 
 def fallback_concepts():
     rows = [("月面信使 · Lunar Courier","同源改款","白色外壳升级为月尘银，加入橙色信号灯与夜间救援识别条。",96,3,"orange"),("深海探针 · Abyss Scout","衍生方案","深海蓝防水外壳与荧光黄色标记，探索未知海域的微型伙伴。",91,4,"blue"),("花园精灵 · Garden Bot","衍生方案","柔和薄荷绿与种子舱设计，让每一次探索都带回新的生命。",89,5,"pink"),("火星邮差 · Mars Relay","衍生方案","赤红隔热外壳与可见式天线，适合远距离自动投递任务。",88,4,"orange"),("极地守望 · Polar Scout","衍生方案","冰川白与电光蓝组合，强调低温环境中的安全陪伴。",87,3,"blue"),("森林采样员 · Grove Bot","衍生方案","苔藓绿软质包覆，加入可拆卸样本盒与环境提示灯。",85,5,"pink")]
@@ -126,6 +144,12 @@ async def styles(): return FileResponse(ROOT / "styles.css", media_type="text/cs
 async def script(): return FileResponse(ROOT / "app.js", media_type="text/javascript", headers={"Cache-Control":"no-store"})
 @app.get("/api/config")
 async def config(): return {"ark_configured":configured(),"vision_model":bool(os.getenv("ARK_VISION_MODEL")),"llm_model":bool(os.getenv("ARK_LLM_MODEL")),"image_model":bool(os.getenv("ARK_IMAGE_MODEL"))}
+@app.post("/api/config")
+async def update_config(data: ApiConfigInput):
+    if not data.api_key.strip().startswith("ark-"):
+        raise HTTPException(400, "API Key 格式不正确，应以 ark- 开头")
+    save_env_config(data)
+    return {"ok": True, "ark_configured": True, "message": "配置已安全保存到本机"}
 @app.post("/api/analyze-description")
 async def analyze_description(data: DescriptionInput):
     prompt=ANALYSIS_PROMPT+f"\n用户描述如下：\n{data.description}"
@@ -194,3 +218,7 @@ async def export_markdown(project_id:str):
     project=await get_project(project_id); lines=[f"# {project['name']} · 产品方案报告","","## 视觉结构摘要",project["analysis"]["appearance"],"","## 方案集",""]
     for p in project["plans"]: lines += [f"### {p['name']}",f"- 类型：{p['type']}",f"- 结构匹配：{p['match']}%",f"- 外观描述：{p['appearance']}",f"- 改动点：{p['changes']}",""]
     return Response("\n".join(lines),media_type="text/markdown",headers={"Content-Disposition":"attachment; filename=forgelab-report.md"})
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=int(os.getenv("PORT", "8000")))
