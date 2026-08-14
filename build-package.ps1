@@ -9,7 +9,10 @@ New-Item $dist -ItemType Directory -Force | Out-Null
 
 python -m PyInstaller --noconfirm --clean --onedir --name ForgeLabServer `
   --add-data "index.html;." --add-data "styles.css;." --add-data "extras.css;." `
-  --add-data "app.js;." --add-data ".env.example;." backend.py
+  --add-data "app.js;." --add-data ".env.example;." `
+  --exclude-module torch --exclude-module tensorflow --exclude-module tensorboard `
+  --exclude-module matplotlib --exclude-module pandas --exclude-module scipy `
+  --exclude-module IPython --exclude-module pytest backend.py
 
 Copy-Item (Join-Path $root 'dist\ForgeLabServer\*') $dist -Recurse -Force
 Copy-Item (Join-Path $root 'start.ps1') $dist -Force
