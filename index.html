@@ -68,16 +68,16 @@
       <span class="serial">SETUP / API</span>
       <h2 id="configTitle">连接您的 AI 服务</h2>
       <p class="modal-lead">首次使用请填写火山方舟 API Key。密钥只保存到本机，不会显示在页面，也不会上传到 ForgeLab。</p>
-      <label>火山方舟 API Key<input id="arkApiKey" type="password" autocomplete="off" placeholder="ark-…"></label>
-      <details class="advanced-config"><summary>模型设置（通常无需修改）</summary>
-        <label>视觉模型<input id="visionModel" value="doubao-seed-1-6-vision"></label>
-        <label>文本模型<input id="llmModel" value="doubao-seed-2-0-lite-260215"></label>
-        <label>生图模型<input id="imageModel" value="doubao-seedream-4-0-250828"></label>
-      </details>
+      <label>火山方舟 API Key<input id="arkApiKey" type="password" autocomplete="off" placeholder="ark-…" required></label>
+      <div class="endpoint-config"><div class="endpoint-title"><b>推理接入点 Endpoint ID</b><span>必填</span></div><p>在方舟控制台「推理」中创建或查看接入点，复制形如 <code>ep-2026…</code> 的 ID。三项可分别使用不同接入点。</p>
+        <label>视觉分析接入点<input id="visionModel" placeholder="ep-…" required></label>
+        <label>文本策划接入点<input id="llmModel" placeholder="ep-…" required></label>
+        <label>图片生成接入点<input id="imageModel" placeholder="ep-…" required></label>
+      </div>
       <p class="quota-note">如果出现余额不足、额度用完或 429 限流，系统会暂停本次生成并提醒您前往方舟控制台充值。</p>
       <div class="modal-actions"><a href="https://console.volcengine.com/ark/region:cn-beijing/apiKey" target="_blank" rel="noreferrer">打开方舟控制台 ↗</a><button id="saveConfig" class="primary" type="button">保存并连接</button></div>
     </div>
   </div>
-  <script src="/app.js?v=6"></script>
+  <script src="/app.js?v=7"></script>
 </body>
 </html>

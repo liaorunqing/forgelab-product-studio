@@ -154,11 +154,15 @@ async def styles(): return FileResponse(ROOT / "styles.css", media_type="text/cs
 @app.get("/app.js", include_in_schema=False)
 async def script(): return FileResponse(ROOT / "app.js", media_type="text/javascript", headers={"Cache-Control":"no-store"})
 @app.get("/api/config")
-async def config(): return {"ark_configured":configured(),"vision_model":bool(os.getenv("ARK_VISION_MODEL")),"llm_model":bool(os.getenv("ARK_LLM_MODEL")),"image_model":bool(os.getenv("ARK_IMAGE_MODEL"))}
+async def config():
+    endpoints_configured = all(bool(os.getenv(name, "").strip()) for name in ("ARK_VISION_MODEL", "ARK_LLM_MODEL", "ARK_IMAGE_MODEL"))
+    return {"ark_configured":configured(),"endpoints_configured":endpoints_configured,"ready":configured() and endpoints_configured,"vision_model":bool(os.getenv("ARK_VISION_MODEL")),"llm_model":bool(os.getenv("ARK_LLM_MODEL")),"image_model":bool(os.getenv("ARK_IMAGE_MODEL"))}
 @app.post("/api/config")
 async def update_config(data: ApiConfigInput):
     if not data.api_key.strip().startswith("ark-"):
         raise HTTPException(400, "API Key 格式不正确，应以 ark- 开头")
+    if not all((data.vision_model.strip(), data.llm_model.strip(), data.image_model.strip())):
+        raise HTTPException(400, "请填写视觉、文本和生图三个推理接入点")
     save_env_config(data)
     return {"ok": True, "ark_configured": True, "message": "配置已安全保存到本机"}
 @app.post("/api/analyze-description")
