@@ -49,7 +49,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 ## 配置说明
 
-密钥只放在本地 `.env`，该文件已加入 `.gitignore`，不会提交到公开仓库。请参照 `.env.example` 配置文本模型、视觉模型和图片生成模型。
+密钥只保存在客户本机的 ForgeLab 用户配置目录中（Windows 为 `%APPDATA%\ForgeLab\.env`），不会提交到公开仓库。请参照 `.env.example` 配置文本模型、视觉模型和图片生成模型。
 
 ## 测试
 

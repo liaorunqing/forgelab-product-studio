@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
-import asyncio, base64, json, os
+import asyncio, base64, json, os, threading, webbrowser
 
 import httpx
 from dotenv import load_dotenv
@@ -12,7 +12,9 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).parent
+USER_CONFIG = Path(os.getenv("APPDATA", ROOT)) / "ForgeLab" / ".env"
 load_dotenv(ROOT / ".env")
+load_dotenv(USER_CONFIG, override=True)
 UPLOADS = ROOT / "uploads"
 UPLOADS.mkdir(exist_ok=True)
 ARK_BASE = "https://ark.cn-beijing.volces.com/api/v3"
@@ -54,7 +56,8 @@ def save_env_config(data: ApiConfigInput):
         "ARK_IMAGE_MODEL": data.image_model.strip(),
         "ARK_IMAGE_SIZE": data.image_size.strip() or "2K",
     }
-    ROOT.joinpath(".env").write_text("\n".join(f"{k}={v}" for k, v in values.items()) + "\n", encoding="utf-8")
+    USER_CONFIG.parent.mkdir(parents=True, exist_ok=True)
+    USER_CONFIG.write_text("\n".join(f"{k}={v}" for k, v in values.items()) + "\n", encoding="utf-8")
     os.environ.update(values)
 
 def fallback_concepts():
@@ -221,4 +224,5 @@ async def export_markdown(project_id:str):
 
 if __name__ == "__main__":
     import uvicorn
+    threading.Timer(1.2, lambda: webbrowser.open("http://127.0.0.1:8000/")).start()
     uvicorn.run(app, host="127.0.0.1", port=int(os.getenv("PORT", "8000")))
